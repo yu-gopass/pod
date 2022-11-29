@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"errors"
+	"github.com/yu-gopass/common"
 	"github.com/yu-gopass/pod/domain/model"
 	"github.com/yu-gopass/pod/domain/repository"
 	"github.com/yu-gopass/pod/proto/pod"
@@ -24,11 +26,11 @@ type IPodDataService interface {
 	UpdateToK8s(*pod.PodInfo) error
 }
 
-func NewPodDataService(podRepository repository.PodRepository, clientset *kubernetes.Clientset) IPodDataService {
+func NewPodDataService(podRepository repository.IPodRepository, clientset *kubernetes.Clientset) IPodDataService {
 	return &PodDataService{
 		PodRepository: podRepository,
 		K8sClientSet:  clientset,
-		deployment:    v1.Deployment{},
+		deployment:    &v1.Deployment{},
 	}
 }
 
@@ -38,11 +40,51 @@ type PodDataService struct {
 	deployment    *v1.Deployment
 }
 
+//创建pod到 k8s中
 func (u *PodDataService) CreateToK8s(podInfo *pod.PodInfo) (err error) {
 	u.SetDeployment(podInfo)
-	if _,err = u.K8sClientSet.AppsV1().Deployments(podInfo.PodNamespace).Get(context.TODO(),podInfo.PodName,v12.GetOptions{});err!=nil{
-
+	if _, err = u.K8sClientSet.AppsV1().Deployments(podInfo.PodNamespace).Get(context.TODO(), podInfo.PodName, v12.GetOptions{}); err != nil {
+		if _, err = u.K8sClientSet.AppsV1().Deployments(podInfo.PodNamespace).Create(context.TODO(), u.deployment, v12.CreateOptions{}); err != nil {
+			common.Error(err)
+			return err
+		}
+		common.Info("创建成功")
+		return nil
+	} else {
+		common.Error("Pod" + podInfo.PodName + "已经存在")
+		return errors.New("Pod" + podInfo.PodName + "已经存在")
 	}
+}
+
+//更新deployment、pod
+func (u *PodDataService) UpdateToK8s(podInfo *pod.PodInfo) (err error) {
+	u.SetDeployment(podInfo)
+	if _, err = u.K8sClientSet.AppsV1().Deployments(podInfo.PodNamespace).Get(context.TODO(), podInfo.PodName, v12.GetOptions{}); err != nil {
+		common.Error(err)
+		return errors.New("Pod " + podInfo.PodName + " 不存在，请先创建")
+	} else {
+		if _, err = u.K8sClientSet.AppsV1().Deployments(podInfo.PodNamespace).Update(context.TODO(), u.deployment, v12.UpdateOptions{}); err != nil {
+			common.Error(err)
+			return err
+		}
+		common.Info(podInfo.PodName + " 更新成功")
+		return nil
+	}
+}
+
+//删除pod
+func (u *PodDataService) DeleteFromK8s(pod *model.Pod) (err error) {
+	if err = u.K8sClientSet.AppsV1().Deployments(pod.PodNamespace).Delete(context.TODO(), pod.PodName, v12.DeleteOptions{}); err != nil {
+		common.Error(err)
+		return err
+	} else {
+		if err := u.DeletePod(pod.ID); err != nil {
+			common.Error(err)
+			return err
+		}
+		common.Info("删除Pod ID: " + strconv.FormatInt(pod.ID, 10) + " 成功!")
+	}
+	return nil
 }
 
 func (u *PodDataService) SetDeployment(podInfo *pod.PodInfo) {
@@ -77,12 +119,12 @@ func (u *PodDataService) SetDeployment(podInfo *pod.PodInfo) {
 			Spec: v13.PodSpec{
 				Containers: []v13.Container{
 					{
-						Name:      podInfo.PodName,
-						Image:     podInfo.PodImages,
-						Ports:     u.getContainerPort(podInfo),
-						Env:       u.getEnv(podInfo),
-						Resources: u.getResources(podInfo),
-						ImagePullPolicy:u.getImagePullPolicy(podInfo),
+						Name:            podInfo.PodName,
+						Image:           podInfo.PodImage,
+						Ports:           u.getContainerPort(podInfo),
+						Env:             u.getEnv(podInfo),
+						Resources:       u.getResources(podInfo),
+						ImagePullPolicy: u.getImagePullPolicy(podInfo),
 					},
 				},
 			},

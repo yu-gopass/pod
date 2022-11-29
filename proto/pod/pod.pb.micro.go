@@ -5,27 +5,21 @@ package pod
 
 import (
 	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
+	proto "google.golang.org/protobuf/proto"
 	math "math"
 )
 
 import (
 	context "context"
-	api "github.com/micro/micro/v3/service/api"
-	client "github.com/micro/micro/v3/service/client"
-	server "github.com/micro/micro/v3/service/server"
+	api "github.com/asim/go-micro/v3/api"
+	client "github.com/asim/go-micro/v3/client"
+	server "github.com/asim/go-micro/v3/server"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
-
-// This is a compile-time assertion to ensure that this generated file
-// is compatible with the proto package it is being compiled against.
-// A compilation error at this line likely means your copy of the
-// proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ api.Endpoint
@@ -44,7 +38,7 @@ func NewPodEndpoints() []*api.Endpoint {
 type PodService interface {
 	AddPod(ctx context.Context, in *PodInfo, opts ...client.CallOption) (*Response, error)
 	DeletePod(ctx context.Context, in *PodId, opts ...client.CallOption) (*Response, error)
-	FindPodByID(ctx context.Context, in *PodId, opts ...client.CallOption) (*Response, error)
+	FindPodByID(ctx context.Context, in *PodId, opts ...client.CallOption) (*PodInfo, error)
 	UpdatePod(ctx context.Context, in *PodInfo, opts ...client.CallOption) (*Response, error)
 	FindAllPod(ctx context.Context, in *FindAll, opts ...client.CallOption) (*AllPod, error)
 }
@@ -81,9 +75,9 @@ func (c *podService) DeletePod(ctx context.Context, in *PodId, opts ...client.Ca
 	return out, nil
 }
 
-func (c *podService) FindPodByID(ctx context.Context, in *PodId, opts ...client.CallOption) (*Response, error) {
+func (c *podService) FindPodByID(ctx context.Context, in *PodId, opts ...client.CallOption) (*PodInfo, error) {
 	req := c.c.NewRequest(c.name, "Pod.FindPodByID", in)
-	out := new(Response)
+	out := new(PodInfo)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -116,7 +110,7 @@ func (c *podService) FindAllPod(ctx context.Context, in *FindAll, opts ...client
 type PodHandler interface {
 	AddPod(context.Context, *PodInfo, *Response) error
 	DeletePod(context.Context, *PodId, *Response) error
-	FindPodByID(context.Context, *PodId, *Response) error
+	FindPodByID(context.Context, *PodId, *PodInfo) error
 	UpdatePod(context.Context, *PodInfo, *Response) error
 	FindAllPod(context.Context, *FindAll, *AllPod) error
 }
@@ -125,7 +119,7 @@ func RegisterPodHandler(s server.Server, hdlr PodHandler, opts ...server.Handler
 	type pod interface {
 		AddPod(ctx context.Context, in *PodInfo, out *Response) error
 		DeletePod(ctx context.Context, in *PodId, out *Response) error
-		FindPodByID(ctx context.Context, in *PodId, out *Response) error
+		FindPodByID(ctx context.Context, in *PodId, out *PodInfo) error
 		UpdatePod(ctx context.Context, in *PodInfo, out *Response) error
 		FindAllPod(ctx context.Context, in *FindAll, out *AllPod) error
 	}
@@ -148,7 +142,7 @@ func (h *podHandler) DeletePod(ctx context.Context, in *PodId, out *Response) er
 	return h.PodHandler.DeletePod(ctx, in, out)
 }
 
-func (h *podHandler) FindPodByID(ctx context.Context, in *PodId, out *Response) error {
+func (h *podHandler) FindPodByID(ctx context.Context, in *PodId, out *PodInfo) error {
 	return h.PodHandler.FindPodByID(ctx, in, out)
 }
 
