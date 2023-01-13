@@ -1,3 +1,9 @@
-{"level":"error","ts":"2022-11-29T13:42:26.460+0800","caller":"pod/main.go:62","msg":"error loading source consul: Get \"http://192.168.3.180:8500/v1/kv/micro/config?recurse=\": dial tcp 192.168.3.180:8500: connectex: No connection could be made because the target machine actively refused it."}
-{"level":"error","ts":"2022-11-29T13:42:28.529+0800","caller":"pod/main.go:71","msg":"dial tcp :3306: connectex: No connection could be made because the target machine actively refused it."}
-{"level":"error","ts":"2022-11-29T13:47:06.057+0800","caller":"pod/main.go:71","msg":"Error 1049: Unknown database 'k8s-api'"}
+{"level":"info","ts":"2022-12-29T15:23:49.423+0800","caller":"handler/podHandler.go:19","msg":"添加pod"}
+{"level":"error","ts":"2022-12-29T15:23:49.426+0800","caller":"service/pod_data_service.go:48","msg":"an empty namespace may not be set during creation"}
+{"level":"error","ts":"2022-12-29T15:23:49.426+0800","caller":"handler/podHandler.go:29","msg":"an empty namespace may not be set during creation"}
+{"level":"info","ts":"2022-12-29T15:23:59.122+0800","caller":"handler/podHandler.go:19","msg":"添加pod"}
+{"level":"error","ts":"2022-12-29T15:23:59.122+0800","caller":"service/pod_data_service.go:48","msg":"an empty namespace may not be set during creation"}
+{"level":"error","ts":"2022-12-29T15:23:59.122+0800","caller":"handler/podHandler.go:29","msg":"an empty namespace may not be set during creation"}
+{"level":"info","ts":"2022-12-29T15:24:20.485+0800","caller":"handler/podHandler.go:19","msg":"添加pod"}
+{"level":"error","ts":"2022-12-29T15:24:20.485+0800","caller":"service/pod_data_service.go:48","msg":"an empty namespace may not be set during creation"}
+{"level":"error","ts":"2022-12-29T15:24:20.485+0800","caller":"handler/podHandler.go:29","msg":"an empty namespace may not be set during creation"}

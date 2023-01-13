@@ -31,16 +31,16 @@ import (
 
 var (
 	//服务地址
-	hostIp = "192.168.6.219"
+	hostIp = "192.168.3.181"
 	//服务地址
 	serviceHost = hostIp
 	//服务端口
 	servicePort = "8081"
 	//注册中心配置
-	consulHost       = "192.168.3.180"
+	consulHost = "192.168.3.181"
 	consulPort int64 = 8500
 	//链路追踪
-	tracerHost = "192.168.3.180"
+	tracerHost = "192.168.3.181"
 	tracerPort = 6831
 	//熔断器
 	hystrixPort = 9092

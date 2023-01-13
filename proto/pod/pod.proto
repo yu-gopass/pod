@@ -16,7 +16,7 @@ message PodInfo {
     int64 id = 1;
     string pod_namespace = 2;
     string pod_name = 3;
-    string pod_team_id = 4;
+    int64 pod_team_id = 4;
     float pod_cpu_max = 5;
     int32 pod_replicas =6;
     float pod_memory_max =7;
